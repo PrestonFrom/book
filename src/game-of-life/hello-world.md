@@ -330,6 +330,80 @@ command from within the `wasm-game-of-life/www` directory:
 npm run start
 ```
 
+If you run into issues here, you may need to fix a few things for newer versions
+of npm:
+
+* If you see an error like the below:
+
+```
+opensslErrorStack: [ 'error:03000086:digital envelope routines::initialization error' ]
+```
+
+You probably need to update some dependencies. Try running the below:
+
+```
+npm install -g npm-check-updates
+ncu
+npm update
+```
+
+* If you run into an error like the below:
+
+```
+[webpack-cli] Failed to load '/home/prestonfrom/Projects/wasm-game-of-life/www/webpack.config.js' config
+[webpack-cli] Invalid options object. Copy Plugin has been initialized using an options object that does not match the API schema.
+ - options[0] should be an object:
+   object { patterns, options? }
+```
+
+You probably need to update how `CopyWebpackPlugin` is initialized. Try using this instead of the current version:
+
+```
+  plugins: [
+    new CopyWebpackPlugin({
+        patterns: [
+            {from: path.resolve('index.html')}
+          ]})
+  ],
+```
+
+* If you run into errors related to WASM like this:
+
+```
+The module seem to be a WebAssembly module, but module is not flagged as WebAssembly module for webpack.
+BREAKING CHANGE: Since webpack 5 WebAssembly is not enabled by default and flagged as experimental feature.
+You need to enable one of the WebAssembly experiments via 'experiments.asyncWebAssembly: true' (based on async modules) or 'experiments.syncWebAssembly: true' (like webpack 4, deprecated).
+For files that transpile to WebAssembly, make sure to set the module type in the 'module.rules' section of the config (e. g. 'type: "webassembly/async"').
+(Source code omitted for this binary file)
+```
+
+Try updating `webpack.config.js` so it looks like this:
+
+```
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const path = require('path');
+
+module.exports = {
+  entry: "./bootstrap.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "bootstrap.js",
+  },
+  mode: "development",
+  plugins: [
+    new CopyWebpackPlugin({
+        patterns: [
+            {from: path.resolve('index.html')}
+          ]})
+  ],
+  experiments: {
+      asyncWebAssembly: true,
+  }
+};
+
+```
+
+
 Navigate your Web browser to [http://localhost:8080/](http://localhost:8080/)
 and you should be greeted with an alert message:
 
